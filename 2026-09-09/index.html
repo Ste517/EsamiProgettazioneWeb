@@ -124,6 +124,20 @@
             padding: 0;
         }
 
+        @media screen and (max-width: 700px) {
+            section.no-background {
+                flex-direction: column;
+            }
+
+            form {
+                flex-direction: column;
+            }
+
+            form>* {
+                width: 100%;
+            }
+        }
+
         hr {
             height: 2px;
             background-color: green;
