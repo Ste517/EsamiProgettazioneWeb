@@ -263,6 +263,10 @@
                     deleteActivity(index);
                 });
                 card.appendChild(buttons);
+                
+                const countElement = document.querySelector(`section.no-background>:nth-child(${this.stato + 1})>h2>span`);
+                countElement.innerText = Number(countElement.innerText) + 1;
+
                 displayAttivita.getElementsByClassName('content-display')[this.stato].appendChild(card);
             }
 
@@ -287,6 +291,9 @@
         function refreshDisplay() {
             for (const element of displayAttivita.querySelectorAll('.content-display')) {
                 element.innerHTML = "";
+            }
+            for (const countElement of document.querySelectorAll('section.no-background h2>span')) {
+                countElement.innerText = '0';
             }
             const currentView = currentFilter === null
                 ? activities
