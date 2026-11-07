@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bacheca delle attività</title>
+    <style>
+        input:focus:invalid {
+            background-color: #faa;
+        }
+
+        header {
+            padding: 10px;
+
+            text-align: center;
+
+            background-color: green;
+            color: white;
+        }
+
+        body {
+            font-family: sans-serif;
+
+            background-color: lemonchiffon;
+
+            margin: 0;
+            padding: 0;
+        }
+
+        main {
+            padding: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        section {
+            padding: 20px;
+            background-color: white;
+            flex-grow: 1;
+        }
+
+        .black-corners {
+            border: 1px solid black;
+        }
+
+        .rounded-corners {
+            border-radius: 10px;
+        }
+
+        nav ul {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+            list-style-type: none;
+        }
+
+        button {
+            font-family: sans-serif;
+            background-color: green;
+            border-radius: 5px;
+            color: white;
+        }
+
+        button.highlight {
+            background-color: darkorange;
+        }
+
+        input,
+        select,
+        button {
+            font-weight: bold;
+            padding: 10px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        form {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            align-items: flex-end;
+            justify-content: stretch;
+        }
+
+        form>label {
+            display: flex;
+            flex-direction: column;
+        }
+
+        form>label:first-of-type {
+            flex: 2;
+        }
+
+        form>label:nth-of-type(2) {
+            flex: 1;
+        }
+
+        form>label:first-of-type {
+            width: 100%;
+        }
+
+        button:disabled {
+            background-color: lightgray;
+        }
+
+        .no-background {
+            background-color: #00000000;
+        }
+
+        section.no-background {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            justify-items: stretch;
+            justify-content: space-between;
+            margin: 0;
+            padding: 0;
+        }
+
+        hr {
+            height: 2px;
+            background-color: green;
+        }
+
+        div.content-display {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        div.card {
+            background-color: lightgreen;
+            display: flex;
+            flex-direction: column;
+
+            padding: 10px;
+            border: 1px solid black;
+            border-radius: 10px;
+        }
+
+        div.card div {
+            display: flex;
+            flex-direction: row;
+            margin-top: 5px;
+            gap: 5px;
+        }
+
+        div.card button {
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Bacheca delle attività</h1>
+    </header>
+    <main>
+        <section class="black-corners">
+            <form action="javascript:creaAttivita()" id="inputAttivita">
+                <label>
+                    Titolo attività
+                    <input name="titolo" type="text" placeholder="Preparare relazione"
+                        pattern="[a-zA-Z0-9][a-zA-Z 0-9]{4,29}"
+                        title="Il titolo deve contenere da 5 a 30 caratteri alfanumerici e non può iniziare con uno spazio"
+                        oninput="checkInput()" required>
+                </label>
+                <label>
+                    Priorità
+                    <select name="priorita">
+                        <option value="bassa">Bassa</option>
+                        <option value="media">Media</option>
+                        <option value="alta">Alta</option>
+                    </select>
+                </label>
+                <button name="submit" disabled="disabled" type="submit">Crea attività</button>
+            </form>
+        </section>
+        <nav>
+            <ul>
+                <li><button onclick="filter()" class="highlight">Tutte</button></li>
+                <li><button onclick="filter(1)">Alta</button></li>
+                <li><button onclick="filter(2)">Media</button></li>
+                <li><button onclick="filter(3)">Bassa</button></li>
+            </ul>
+        </nav>
+        <section class="no-background" id="display-attivita">
+            <section class="black-corners rounded-corners">
+                <h2>Da fare (<span>0</span>)</h2>
+                <hr>
+                <div class="content-display"></div>
+            </section>
+            <section class="black-corners rounded-corners">
+                <h2>In corso (<span>0</span>)</h2>
+                <hr>
+                <div class="content-display"></div>
+            </section>
+            <section class="black-corners rounded-corners">
+                <h2>Completate (<span>0</span>)</h2>
+                <hr>
+                <div class="content-display"></div>
+            </section>
+        </section>
+    </main>
+    <script>
+        const displayAttivita = document.getElementById('display-attivita');
+
+        class Attivita {
+            constructor(titolo, priorita) {
+                this.titolo = titolo;
+                this.priorita = priorita;
+                this.stato = 0;
+            }
+
+            display(index) {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = `<h3>${this.titolo}</h3>Priorità: ${this.priorita}<br>`;
+                const buttons = document.createElement('div');
+                if (this.stato != 0) {
+                    const button = document.createElement('button');
+                    button.innerText = '<';
+                    buttons.appendChild(button);
+                    button.addEventListener('click', () => {
+                        this.setStatus(this.stato - 1);
+                        refreshDisplay();
+                    });
+                }
+                if (this.stato != 2) {
+                    const button = document.createElement('button');
+                    button.innerText = '>';
+                    buttons.appendChild(button);
+                    button.addEventListener('click', () => {
+                        this.setStatus(this.stato + 1);
+                        refreshDisplay();
+                    });
+                }
+                const button = document.createElement('button');
+                button.innerText = 'Elimina';
+                buttons.appendChild(button);
+                button.addEventListener('click', () => {
+                    deleteActivity(index);
+                });
+                card.appendChild(buttons);
+                displayAttivita.getElementsByClassName('content-display')[this.stato].appendChild(card);
+            }
+
+            setStatus(status) {
+                if (status < 0 || status > 2) return;
+                this.stato = status;
+            }
+        }
+
+        let activities = [];
+
+        let currentFilter = null;
+
+        function deleteActivity(index) {
+            activities.splice(index, 1);
+            refreshDisplay();
+        }
+
+        /** @type {HTMLFormElement} */
+        const formElement = document.getElementById('inputAttivita');
+
+        function refreshDisplay() {
+            for (const element of displayAttivita.querySelectorAll('.content-display')) {
+                element.innerHTML = "";
+            }
+            const currentView = currentFilter === null
+                ? activities
+                : activities.filter(elem => elem.priorita === currentFilter);
+
+            currentView.forEach((element, index) => {
+                element.display(index);
+            });
+        }
+
+        function checkInput() {
+            /** @type {HTMLInputElement} */
+            const inputItem = formElement.elements['titolo'];
+            if (inputItem.value == '') formElement.elements['submit'].disabled = true;
+            else formElement.elements['submit'].disabled = inputItem.validity.patternMismatch;
+        }
+
+        /** @type {HTMLElement} */
+        const navElement = document.getElementsByTagName('nav')[0];
+
+
+
+        /** 
+         * @param {number}
+         * @returns {HTMLButtonElement}
+         */
+        function getButtonElementFromNav(index) {
+            return navElement
+                .children[0]
+                .children[index]
+                .children[0];
+        }
+
+        function highlightButton(index) {
+            for (let i = 0; i < 4; ++i) {
+                if (i != index) getButtonElementFromNav(i).classList.remove('highlight');
+                else getButtonElementFromNav(i).classList.add('highlight');
+            }
+        }
+
+        function filter(index = 0) {
+            highlightButton(index);
+            switch (index) {
+                case 1: currentFilter = 'alta'; break;
+                case 2: currentFilter = 'media'; break;
+                case 3: currentFilter = 'bassa'; break;
+                default: currentFilter = null;
+            }
+            refreshDisplay();
+        }
+
+        function creaAttivita() {
+            activities.push(new Attivita(
+                formElement.elements['titolo'].value,
+                formElement.elements['priorita'].value
+            ));
+            refreshDisplay();
+        }
+    </script>
+</body>
+
+</html>
