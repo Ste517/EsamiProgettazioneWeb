@@ -172,7 +172,7 @@
     </style>
 </head>
 
-<body>
+<body onload="loadFromLocalStorage()">
     <header>
         <h1>Bacheca delle attività</h1>
     </header>
@@ -227,10 +227,10 @@
         const displayAttivita = document.getElementById('display-attivita');
 
         class Attivita {
-            constructor(titolo, priorita) {
+            constructor(titolo, priorita, stato = 0) {
                 this.titolo = titolo;
                 this.priorita = priorita;
-                this.stato = 0;
+                this.stato = stato;
             }
 
             display(index) {
@@ -273,6 +273,7 @@
             setStatus(status) {
                 if (status < 0 || status > 2) return;
                 this.stato = status;
+                saveToLocalStorage();
             }
         }
 
@@ -283,6 +284,7 @@
         function deleteActivity(index) {
             activities.splice(index, 1);
             refreshDisplay();
+            saveToLocalStorage();
         }
 
         /** @type {HTMLFormElement} */
@@ -350,6 +352,16 @@
                 formElement.elements['titolo'].value,
                 formElement.elements['priorita'].value
             ));
+            refreshDisplay();
+            saveToLocalStorage();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('2026-09-09-bacheca-attivita',JSON.stringify(activities)); 
+        }
+
+        function loadFromLocalStorage() {
+            JSON.parse(localStorage.getItem('2026-09-09-bacheca-attivita') ?? '[]').map(a => activities.push(new Attivita(a.titolo, a.priorita, a.stato)));
             refreshDisplay();
         }
     </script>
