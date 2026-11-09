@@ -182,7 +182,7 @@
                 <label>
                     Titolo attività
                     <input name="titolo" type="text" placeholder="Preparare relazione"
-                        pattern="[a-zA-Z0-9][a-zA-Z 0-9]{4,29}"
+                        pattern="[a-zA-Z0-9][a-zA-Z 0-9]{3,28}[a-zA-Z0-9]"
                         title="Il titolo deve contenere da 5 a 30 caratteri alfanumerici e non può iniziare con uno spazio"
                         oninput="checkInput()" required>
                 </label>
@@ -309,8 +309,12 @@
         function checkInput() {
             /** @type {HTMLInputElement} */
             const inputItem = formElement.elements['titolo'];
-            if (inputItem.value == '') formElement.elements['submit'].disabled = true;
-            else formElement.elements['submit'].disabled = inputItem.validity.patternMismatch;
+            if (inputItem.value == '') {
+                formElement.elements['submit'].disabled = true;
+            }
+            else {
+                formElement.elements['submit'].disabled = inputItem.validity.patternMismatch;
+            }
         }
 
         /** @type {HTMLElement} */
@@ -349,7 +353,7 @@
 
         function creaAttivita() {
             activities.push(new Attivita(
-                formElement.elements['titolo'].value,
+                formElement.elements['titolo'].value.trim(),
                 formElement.elements['priorita'].value
             ));
             refreshDisplay();
