@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione postazioni aula informatica</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 12px;
+            background-color: #d5ef09;
+        }
+        
+        .flex-container {
+            display: flex;
+        }
+        .hidden {
+            display: none;
+        }
+
+        main {
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        section {
+            flex: 1;
+            background-color: white;
+            border: 1px solid black;
+            padding: 8px;
+        }
+        section.postazioni {
+            flex: 1 1 1;
+            
+            table {
+                border-spacing: 5px;
+                margin: -5px;
+            }
+            td {
+                padding: 15px;
+                font-weight: bold;
+                border: 1px solid black;
+                text-align: center;
+            }
+            td.full {
+                background-color: #ffb3b3;
+            }
+            td.one-full {
+                background-color: #cfe8ff;
+            }
+            table.clickable td:hover {
+                background-color: lightgray;
+                cursor: pointer;
+            }
+            
+        }
+        form.flex-container {
+            flex-direction: column;
+            gap: 6px;
+
+            input,select {
+                padding: 8px;
+                border: 1px solid gray;
+                border-radius: 2px;
+            }
+
+            input:invalid,select:invalid {
+                border: 2px solid red;
+                border-radius: 0;
+            }
+
+            button {
+                border: 1px solid gray;
+                color: black;
+                padding: 8px;
+            }
+            button:disabled {
+                border: 1px solid lightgray;
+                color: lightgray;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Gestione postazioni aula informatica</h1>
+    <main class="flex-container">
+        <section>
+            <h3>Prenotazione</h3>
+            <form class="flex-container" action="javascript:alert('ciao')">
+                <label><b>Nome</b></label><input type="text" name="nome" pattern="[A-Z][a-z]*" title="Il nome deve essere composto di sole lettere e deve avere l'iniziale maiuscola" placeholder="Mario" required>
+                <label><b>Cognome</b></label><input type="text" name="cognome" pattern="[A-Z][a-z]*" title="Il cognome deve essere composto di sole lettere e deve avere l'iniziale maiuscola" placeholder="Rossi" required>
+                <label><b>Numero postazione</b></label><input type="number" name="postazione" min="1" max="30" placeholder="12" required>
+                <label><b>Fascia oraria</b></label><select name="orario" required>
+                    <option value="">Seleziona...</option>
+                    <option>9-11</option>
+                    <option>11-13</option>
+                    <option>14-16</option>
+                    <option>16-18</option>
+                </select>
+                <button type="submit" disabled>Prenota</button>
+            </form>
+        </section>
+        <section class="postazioni">
+            <h3>Postazioni</h3>
+            <table>
+            </table>
+        </section>
+        <section>
+            <h3>Dettaglio postazione</h3>
+            <p>Clicca una postazione per vedere il dettaglio delle prenotazioni.</p>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
