@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,61 +12,84 @@
             padding: 12px;
             background-color: #d5ef09;
         }
-        
+
         .flex-container {
             display: flex;
+            flex-direction: column;
         }
+
         .hidden {
             display: none;
         }
 
-        main {
+        main.flex-container {
             flex-direction: row;
             justify-content: space-between;
             gap: 8px;
         }
+
         section {
             flex: 1;
             background-color: white;
             border: 1px solid black;
             padding: 8px;
         }
+
+        section:nth-child(3) table {
+            border-collapse: collapse;
+
+            tr:first-child {
+                background-color: #eee;
+            }
+            
+            td,th {
+                border: 1px solid #ccc;
+                padding: 8px;
+            }
+        }
+
         section.postazioni {
             flex: 1 1 1;
-            
+
             table {
                 border-spacing: 5px;
                 margin: -5px;
             }
+
             td {
                 padding: 15px;
                 font-weight: bold;
                 border: 1px solid black;
                 text-align: center;
             }
+
             td.full {
                 background-color: #ffb3b3;
             }
+
             td.one-full {
                 background-color: #cfe8ff;
             }
+
             table.clickable td:hover {
                 background-color: lightgray;
                 cursor: pointer;
             }
-            
+
         }
+
         form.flex-container {
-            flex-direction: column;
             gap: 6px;
 
-            input,select {
+            input,
+            select {
                 padding: 8px;
                 border: 1px solid gray;
                 border-radius: 2px;
             }
 
-            input:invalid,select:invalid {
+            input:invalid,
+            select:invalid {
                 border: 2px solid red;
                 border-radius: 0;
             }
@@ -75,22 +99,36 @@
                 color: black;
                 padding: 8px;
             }
+
             button:disabled {
                 border: 1px solid lightgray;
                 color: lightgray;
             }
         }
+
+        .error-box {
+            margin-top: 8px;
+            background-color: #FFE5E6;
+            border: 1px solid #FFB3B3;
+            padding: 8px;
+        }
     </style>
 </head>
+
 <body>
     <h1>Gestione postazioni aula informatica</h1>
     <main class="flex-container">
         <section>
             <h3>Prenotazione</h3>
-            <form class="flex-container" action="javascript:alert('ciao')">
-                <label><b>Nome</b></label><input type="text" name="nome" pattern="[A-Z][a-z]*" title="Il nome deve essere composto di sole lettere e deve avere l'iniziale maiuscola" placeholder="Mario" required>
-                <label><b>Cognome</b></label><input type="text" name="cognome" pattern="[A-Z][a-z]*" title="Il cognome deve essere composto di sole lettere e deve avere l'iniziale maiuscola" placeholder="Rossi" required>
-                <label><b>Numero postazione</b></label><input type="number" name="postazione" min="1" max="30" placeholder="12" required>
+            <form class="flex-container">
+                <label><b>Nome</b></label><input type="text" name="nome" pattern="[A-Z][a-z]*"
+                    title="Il nome deve essere composto di sole lettere e deve avere l'iniziale maiuscola"
+                    placeholder="Mario" required>
+                <label><b>Cognome</b></label><input type="text" name="cognome" pattern="[A-Z][a-z]*"
+                    title="Il cognome deve essere composto di sole lettere e deve avere l'iniziale maiuscola"
+                    placeholder="Rossi" required>
+                <label><b>Numero postazione</b></label><input type="number" name="postazione" min="1" max="30"
+                    placeholder="12" required>
                 <label><b>Fascia oraria</b></label><select name="orario" required>
                     <option value="">Seleziona...</option>
                     <option>9-11</option>
@@ -106,11 +144,242 @@
             <table>
             </table>
         </section>
-        <section>
+        <section class="flex-container">
             <h3>Dettaglio postazione</h3>
             <p>Clicca una postazione per vedere il dettaglio delle prenotazioni.</p>
         </section>
     </main>
-    <script src="script.js"></script>
+    <script>
+        class Prenotazione {
+            /**
+             * 
+             * @param {string} nome 
+             * @param {string} cognome 
+             * @param {string} fasciaOraria
+             * @param {number} postazione
+             */
+            constructor(nome, cognome, fasciaOraria, postazione) {
+                if (typeof (nome) != 'string') {
+                    throw new Error('nome must be of type string');
+                }
+                if (typeof (cognome) != 'string') {
+                    throw new Error('cognome must be of type string');
+                }
+                if (typeof (fasciaOraria) != 'string') {
+                    throw new Error('fasciaOraria must be of type string');
+                }
+                if (typeof (postazione) != 'number') {
+                    throw new Error('postazione must be of type number');
+                }
+
+                this.nome = nome;
+                this.cognome = cognome;
+                this.fasciaOraria = fasciaOraria;
+                this.postazione = postazione;
+            }
+
+            /**
+             * @returns {HTMLTableRowElement}
+             */
+            asTableRow() {
+                const tableRow = document.createElement('tr');
+                for (let key of ['nome', 'cognome', 'fasciaOraria']) {
+                    const tableElem = document.createElement('td');
+                    tableElem.innerText = this[key];
+                    tableRow.appendChild(tableElem);
+                }
+                return tableRow;
+            }
+
+            /** 
+             * @type {HTMLFormControlsCollection}
+             * @returns {Prenotazione | null | undefined} */
+            static fromFormData(formData) {
+                if (formData === null) return undefined;
+
+                const nome = formData['nome']?.value;
+                const cognome = formData['cognome']?.value;
+                const orario = formData['orario']?.value;
+                const postazione = formData['postazione']?.value;
+
+                if (nome === undefined || cognome === undefined || orario === undefined || postazione === undefined) return undefined;
+
+                const regexNomeCognome = /[A-Z][a-z]*/;
+                if (!regexNomeCognome.test(nome)) throw undefined;
+                if (!regexNomeCognome.test(cognome)) return undefined;
+
+                if (!(['9-11', '11-13', '14-16', '16-18'].find((elem) => orario === elem))) {
+                    return undefined;
+                }
+
+                if (postazione < 1 | postazione > 30) return undefined;
+
+                try {
+                    const prenotazione = new Prenotazione(nome, cognome, orario, Number.parseInt(postazione));
+                    return prenotazione;
+                } catch (e) {
+                    console.log(e.message);
+                    return undefined;
+                }
+            }
+        }
+
+        class Postazione {
+            constructor(numeroPostazione) {
+                if (typeof (numeroPostazione) != 'number') {
+                    throw new Error('numeroPostazione must be of type number');
+                }
+                if (!Number.isInteger(numeroPostazione)) {
+                    throw new Error('numeroPostazione must be an integer value')
+                }
+                if (numeroPostazione < 1 || numeroPostazione > 30) {
+                    throw new Error('numeroPostazione must be between 1 and 30');
+                }
+                this.numeroPostazione = numeroPostazione;
+                this.prenotazioni = [];
+            }
+
+            addPrenotazione(prenotazione) {
+                if (!(prenotazione instanceof Prenotazione)) {
+                    throw new Error('prenotazione must be a valid Prenotazione object');
+                }
+                if (prenotazione.postazione != this.numeroPostazione) {
+                    throw new Error('Il numero della postazione deve coincidere con quello della prenotazione');
+                }
+
+                const fasciaOccupata = this.prenotazioni.find((obj) =>
+                    obj.fasciaOraria === prenotazione.fasciaOraria
+                );
+
+                if (fasciaOccupata) {
+                    return false;
+                }
+
+                this.prenotazioni.push(prenotazione);
+
+                return true;
+            }
+
+            getDetailElement() {
+                const detailElement = document.createElement('div');
+                detailElement.classList.add('flex-container');
+                detailElement.innerHTML += '<p><b>Postazione ' + this.numeroPostazione + '</b> - prenotazioni (ordinate per fascia)</p>';
+                const tableElem = document.createElement('table');
+                tableElem.innerHTML = '<tr><th>Nome</th><th>Cognome</th><th>Fascia oraria</th></tr>';
+                this.prenotazioni.sort((a, b) =>
+                    Number.parseInt(a.fasciaOraria.split('-')[0]) - Number.parseInt(b.fasciaOraria.split('-')[0])
+                ).forEach((elem) => {
+                    tableElem.appendChild(elem.asTableRow());
+                })
+                detailElement.appendChild(tableElem);
+                return detailElement;
+            }
+        }
+
+        class SistemaGestione {
+            /**
+             * 
+             * @param {HTMLTableElement} tabellaPostazioni 
+             * @param {HTMLFormElement} form 
+             * @param {HTMLElement} detailTab 
+             */
+            constructor(tabellaPostazioni, form, detailTab) {
+                this.postazioni = [];
+                let numPostazione = 1;
+                for (let i = 0; i < 5; i++) {
+                    const tr = document.createElement('tr');
+                    for (let j = 0; j < 6; j++) {
+                        const td = document.createElement('td');
+                        td.innerText = numPostazione;
+                        let postazione = new Postazione(numPostazione);
+                        td.addEventListener('click', () => {
+                            if (tabellaPostazioni.classList.contains('clickable')) {
+                                const paragraph = detailTab.getElementsByTagName('p')[0];
+                                paragraph.classList.add('hidden');
+                                tabellaPostazioni.classList.remove('clickable');
+                                const detailElement = postazione.getDetailElement();
+                                detailTab.appendChild(detailElement);
+                                setTimeout(() => {
+                                    detailElement.remove();
+                                    tabellaPostazioni.classList.add('clickable');
+                                    paragraph.classList.remove('hidden');
+                                }, 5000);
+                            }
+                        })
+                        this.postazioni.push(postazione);
+                        numPostazione++;
+                        tr.appendChild(td);
+                    }
+                    tabellaPostazioni.appendChild(tr);
+                    tabellaPostazioni.classList.add('clickable');
+
+
+                }
+                const submitButton = form.getElementsByTagName('button')[0];
+
+                form.addEventListener('input', () => {
+                    submitButton.disabled = !form.checkValidity();
+                });
+
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    this.aggiungiPrenotazione();
+                });
+
+                this.tabellaPostazioni = tabellaPostazioni;
+                this.form = form;
+                this.detailTab = detailTab;
+            }
+
+            getPostazioneElem(postazione) {
+                if (!(postazione instanceof Postazione)) {
+                    return null;
+                }
+                return this.tabellaPostazioni.getElementsByTagName('td')[postazione.numeroPostazione - 1];
+            }
+
+            aggiungiPrenotazione() {
+                const newPrenotazione = Prenotazione.fromFormData(this.form.elements);
+                if (newPrenotazione instanceof Prenotazione) {
+                    const postazione = this.postazioni[newPrenotazione.postazione - 1];
+                    if (!postazione.addPrenotazione(newPrenotazione)) {
+                        const errorElement = document.createElement('div');
+                        errorElement.classList.add('error-box');
+                        errorElement.innerText = 'Postazione già occupata nella fascia selezionata';
+                        document.querySelector('section').appendChild(errorElement);
+                        setTimeout(() => {
+                            errorElement.remove();
+                        }, 3000);
+                    } else {
+                        if (postazione.prenotazioni.length === 4) {
+                            this.getPostazioneElem(postazione).classList.add('full');
+                            this.getPostazioneElem(postazione).classList.remove('one-full');
+                        } else if (postazione.prenotazioni.length > 0) {
+                            this.getPostazioneElem(postazione).classList.remove('full');
+                            this.getPostazioneElem(postazione).classList.add('one-full');
+                        } else {
+                            this.getPostazioneElem(postazione).classList.remove('full');
+                            this.getPostazioneElem(postazione).classList.remove('one-full');
+                        }
+                        this.form.reset();
+                    }
+                } else {
+                    const errorElement = document.createElement('div');
+                    errorElement.classList.add('error-box');
+                    if (newPrenotazione === undefined) {
+                        errorElement.innerText = 'Elementi del form non validi';
+                    }
+                    document.querySelector('section').appendChild(errorElement);
+                    setTimeout(() => {
+                        errorElement.remove();
+                    }, 3000);
+                }
+            }
+        }
+
+        const sistema = new SistemaGestione(document.querySelector('section.postazioni table'), document.querySelector('form'), document.querySelector('section.flex-container'));
+
+    </script>
 </body>
+
 </html>
