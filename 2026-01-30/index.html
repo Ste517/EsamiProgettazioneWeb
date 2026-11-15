@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,44 +9,53 @@
         body {
             font-family: sans-serif;
         }
+
         main {
             display: flex;
             flex-direction: row;
             align-content: space-around;
             gap: 20px;
         }
+
         section {
             flex: 1;
             border: 1px solid black;
             border-radius: 10px;
             padding: 10px;
         }
+
         section:nth-child(2) {
             background-color: #F5F5DC;
         }
+
         section:nth-child(1) {
             background-color: #F0FFFF;
         }
+
         form {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
+
         label {
             display: flex;
             font-weight: bold;
             flex-direction: column;
             gap: 4px;
         }
-        input[type = 'text'] {
+
+        input[type='text'] {
             border: 1px solid gray;
             border-radius: 4px;
             padding: 10px;
         }
+
         label div {
             display: flex;
             gap: 4px;
         }
+
         textarea {
             border: 1px solid gray;
             border-radius: 4px;
@@ -54,17 +64,58 @@
             padding: 10px;
             resize: vertical;
         }
+
         .search-results {
             height: 400px;
             overflow-y: auto;
             overflow-x: hidden;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
         }
+
+        .flex-row {
+            display: flex;
+            gap: 4px;
+        }
+
         .hidden {
             display: none;
         }
+
+        .card {
+            padding: 10px;
+            background-color: #F0F7FF;
+            border: 1px solid black;
+            border-radius: 10px;
+        }
+
+        .alert {
+            position: absolute;
+            width: 300px;
+            height: 400px;
+            left: 200px;
+            top: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 1;
+            background-color: #FFB6C1;
+            border: 2px solid black;
+            border-radius: 10px;
+            padding: 20px;
+
+            h1 {
+                color: red;
+            }
+        }
     </style>
 </head>
+
 <body>
     <main>
         <section>
@@ -86,10 +137,193 @@
             <button>Elimina tutte</button>
             <p>Nessun risultato per la ricerca.</p>
             <div class="search-results hidden">
-                
+
             </div>
         </section>
     </main>
-    <script src="script.js"></script>
+    <script>
+        class Nota {
+            /**
+             * 
+             * @param {string} titolo 
+             * @param {string} contenuto 
+             */
+            constructor(titolo, contenuto) {
+                this.creationDate = new Date();
+
+                this.titolo = titolo;
+                this.contenuto = contenuto;
+            }
+
+            asCardElement(modifyCallback = null, deleteCallback = null) {
+                const newCard = document.createElement('div');
+                newCard.classList.add('card');
+                const title = document.createElement('h2');
+                title.innerText = this.titolo;
+                const contenuto = document.createElement('p');
+                contenuto.innerText = this.contenuto;
+                const info = document.createElement('div');
+                info.classList.add('flex-row');
+                info.innerText = 'Creata: ' + this.creationDate.toLocaleString();
+                const editButton = document.createElement('button');
+                editButton.innerText = 'Modifica';
+                editButton.onclick = modifyCallback;
+                const deleteButton = document.createElement('button');
+                deleteButton.innerText = 'Elimina';
+                deleteButton.onclick = () => { deleteCallback(); newCard.remove(); };
+                info.appendChild(editButton);
+                info.appendChild(deleteButton);
+                newCard.appendChild(title);
+                newCard.appendChild(contenuto);
+                newCard.appendChild(info);
+                return newCard;
+            }
+        }
+
+        class Sistema {
+            /**
+             * 
+             * @param {HTMLFormElement} form 
+             * @param {HTMLInputElement} searchBar 
+             * @param {HTMLDivElement} searchResultsContainer 
+             */
+            constructor(form, searchBar, searchResultsContainer) {
+                /** @type {Nota[]} */
+                this.note = [];
+                this.notaAttuale = null;
+
+                form.addEventListener('submit', (ev) => {
+                    ev.preventDefault();
+
+                    if (this.notaAttuale === null) {
+                        this.notaAttuale = new Nota(form.elements['titolo'].value, form.elements['contenuto'].value);
+                        this.note.push(this.notaAttuale);
+                    } else {
+                        this.notaAttuale.titolo = form.elements['titolo'].value;
+                        this.notaAttuale.contenuto = form.elements['contenuto'].value;
+                    }
+                    this.saveToLocalStorage();
+                    this.refreshSearchContainer();
+                });
+
+                form.addEventListener('reset', () => {
+                    this.notaAttuale = null;
+                });
+
+                searchBar.addEventListener('input', () => {
+                    this.refreshSearchContainer();
+                });
+
+                document.querySelector('section>button').onclick = () => {
+                    this.deleteAll();
+                }
+
+                this.loadFromLocalStorage();
+
+                this.form = form;
+                this.searchBar = searchBar;
+                this.searchResultsContainer = searchResultsContainer;
+            }
+
+            deleteAll() {
+                if (this.ongoingDelete) return;
+
+                this.ongoingDelete = true;
+
+                const elemAlert = document.createElement('div');
+                elemAlert.classList.add('alert');
+                elemAlert.innerHTML = '<p>Tutte le note verranno eliminate.</p>';
+                const countdown = document.createElement('h1');
+                let i = 10;
+                let interval = setInterval(() => {
+                    i--;
+                    countdown.innerText = i;
+                    if (i <= 0) {
+                        this.note.length = 0;
+                        this.saveToLocalStorage();
+                        this.refreshSearchContainer();
+                        clearInterval(interval);
+                        elemAlert.remove();
+                        this.ongoingDelete = false;
+                    }
+                }, 1000);
+                countdown.innerText = i;
+                const undoButton = document.createElement('button');
+                undoButton.innerText = 'Annulla';
+                undoButton.onclick = () => {
+                    clearInterval(interval);
+                    elemAlert.remove();
+                    this.ongoingDelete = false;
+                }
+                elemAlert.append(countdown, undoButton);
+                document.getElementsByTagName('body')[0].appendChild(elemAlert);
+            }
+
+            refreshSearchContainer() {
+                this.searchResultsContainer.innerHTML = '';
+
+                let corrispondenzaNote = [];
+                const searchParam = searchBar.value;
+                this.note.forEach((nota) => {
+                    if (nota.titolo.includes(searchParam)) corrispondenzaNote.push(nota);
+                    if (corrispondenzaNote.indexOf(nota) === -1 && nota.contenuto.includes(searchParam)) corrispondenzaNote.push(nota);
+                });
+
+                const noNoteFoundElem = document.querySelector('section:nth-child(2) p');
+                if (corrispondenzaNote.length === 0) {
+                    noNoteFoundElem.classList.remove('hidden');
+                    this.searchResultsContainer.classList.add('hidden');
+                } else {
+                    noNoteFoundElem.classList.add('hidden');
+                    this.searchResultsContainer.classList.remove('hidden');
+                    corrispondenzaNote.forEach(element => {
+                        this.searchResultsContainer.appendChild(element.asCardElement(
+                            () => {
+                                this.notaAttuale = element;
+                                this.form.elements['titolo'].value = element.titolo;
+                                this.form.elements['contenuto'].value = element.contenuto;
+                            },
+                            () => {
+                                const indexOfElem = this.note.indexOf(element);
+                                if (indexOfElem != -1) {
+                                    this.note.splice(indexOfElem, 1);
+                                }
+                                this.saveToLocalStorage();
+                            }
+                        ));
+                    });
+                }
+            }
+
+            saveToLocalStorage() {
+                localStorage.setItem('2026-01-30-esame-pweb', JSON.stringify(this.note))
+            }
+
+            loadFromLocalStorage() {
+                let savedItem = localStorage.getItem('2026-01-30-esame-pweb');
+                if (savedItem !== null) {
+                    try {
+                        let parsed = JSON.parse(savedItem);
+                        this.note = [];
+
+                        for (let obj of parsed) {
+                            let nota = new Nota(obj.titolo, obj.contenuto);
+                            nota.creationDate = new Date(obj.creationDate);
+                            this.note.push(nota);
+                        }
+                    } catch (e) {
+                        console.log("Corrupted local storage")
+                    }
+                }
+            }
+        }
+
+        let sistema = new Sistema(
+            document.querySelector('form'),
+            document.getElementById('searchBar'),
+            document.querySelector('.search-results')
+        );
+    </script>
 </body>
+
 </html>
