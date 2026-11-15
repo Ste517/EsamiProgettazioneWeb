@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestisci note</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        main {
+            display: flex;
+            flex-direction: row;
+            align-content: space-around;
+            gap: 20px;
+        }
+        section {
+            flex: 1;
+            border: 1px solid black;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        section:nth-child(2) {
+            background-color: #F5F5DC;
+        }
+        section:nth-child(1) {
+            background-color: #F0FFFF;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        label {
+            display: flex;
+            font-weight: bold;
+            flex-direction: column;
+            gap: 4px;
+        }
+        input[type = 'text'] {
+            border: 1px solid gray;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        label div {
+            display: flex;
+            gap: 4px;
+        }
+        textarea {
+            border: 1px solid gray;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: sans-serif;
+            padding: 10px;
+            resize: vertical;
+        }
+        .search-results {
+            height: 400px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <section>
+            <p>Usa il form per creare una nuova nota o modificarne una esistente.</p>
+            <form action="">
+                <label>Titolo<input type="text" name="titolo"></label>
+                <label>Contenuto<textarea name="contenuto"></textarea>
+                    <div><input type="submit" value="Salva nota"><input type="reset" value="Pulisci"></div>
+                </label>
+            </form>
+            <hr>
+            <label>
+                <input type="text" id="searchBar" placeholder="Filtra per titolo o testo">
+            </label>
+            <p>La lista si aggiorna mentre scrivi.</p>
+        </section>
+        <section>
+            <h1>Note</h1>
+            <button>Elimina tutte</button>
+            <p>Nessun risultato per la ricerca.</p>
+            <div class="search-results hidden">
+                
+            </div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
