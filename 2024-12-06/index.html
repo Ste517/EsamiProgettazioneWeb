@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compitino</title>
+    <style>
+        body {
+            margin: 0;
+            font-size: larger;
+        }
+        main {
+            display: flex;
+            flex-direction: row;
+            
+            box-sizing: border-box;
+            min-height: 100vh;
+
+            section {
+                flex: 1;
+                padding: 40px;
+            }
+        }
+
+        #gameSection {
+            background-color: #D3D3D3;
+
+            table {
+                border-spacing: 4px;
+                width: 100%;
+
+                td {
+                    padding: 15px;
+                    background-color: white;
+                    border: 2px solid black;
+                }
+
+                .currentCell {
+                    background-color: red;
+                }
+
+                .currentCell:hover {
+                    cursor: pointer;
+                }
+
+            }
+        }
+
+        #dataInput {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        #scoreSection {
+            background-color: #1600FA;
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+
+                
+                th,td {
+                    padding: 5px;
+                    border: 1px solid black;
+                    text-align: center;
+                }
+                th {
+                    background-color: #FAFBD4;
+                }
+                td {
+                    background-color: #DFFFFE;
+                }
+            }
+        }
+
+        input:invalid {
+            background-color: orange;
+            border: 2px solid;
+        }
+
+        
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <section id="gameSection">
+            <form id="dataInput">
+                <b>Inserisci il tuo nome e gioca:</b>
+                <input type="text" id="playerNameInput">
+                <button type="submit" id="startGameButton"><b>Gioca</b></button>
+            </form>
+            <div id="gameArea" class="hidden">
+                <table>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+        <section id="scoreSection">
+            <table>
+                <thead><tr><th>Nome</th><th>Punteggio</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td>asdasd</td>
+                        <td>dsdas</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
