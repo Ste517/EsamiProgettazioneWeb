@@ -32,11 +32,13 @@ class Game {
     }
 
     gameLoop() {
-        const celle = document.querySelectorAll("#gameArea table tr td").values();
         if (this.activeCell) {
             this.activeCell.classList.remove('currentCell');
             this.activeCell.removeEventListener('click', this.handleClick);
         }
+
+        const celle = document.querySelectorAll("#gameArea table tr td");
+        
         this.activeCell = celle[Math.floor(Math.random() * 10)];
         this.activeCell.classList.add('currentCell');
         this.activeCell.addEventListener('click', this.handleClick);
@@ -97,8 +99,10 @@ class GameHandler {
 
     startNewGame() {
         if (!this.checkInputValidity()) return;
-        this.currentGame = new Game(() => {document.querySelector('input').value, this.terminateOldGame();});
+        const inputElem = document.querySelector('input');
+        this.currentGame = new Game(inputElem.value, () => {this.terminateOldGame();});
         document.getElementById('dataInput').classList.add('hidden');
+        inputElem.value = '';
         document.getElementById('gameArea').classList.remove('hidden');
     }
 
