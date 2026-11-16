@@ -219,12 +219,12 @@
                     this.deleteAll();
                 }
 
-                this.loadFromLocalStorage();
-                this.refreshSearchContainer();
-
                 this.form = form;
                 this.searchBar = searchBar;
                 this.searchResultsContainer = searchResultsContainer;
+
+                this.loadFromLocalStorage();
+                this.refreshSearchContainer();
             }
 
             deleteAll() {
