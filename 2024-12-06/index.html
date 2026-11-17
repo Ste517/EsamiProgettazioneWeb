@@ -204,6 +204,7 @@
             checkInputValidity() {
                 const regex = /[A-Z][a-zA-Z]{2,9}/;
                 const inputElem = document.querySelector('input');
+                inputElem.title = 'Il nome deve avere una lunghezza tra 3 e 10 caratteri e deve iniziare per una lettera maiuscola';
                 if (regex.test(inputElem.value)) {
                     inputElem.setCustomValidity('');
                 } else {
@@ -214,6 +215,7 @@
                 for (let partita of this.partite) {
                     if (partita.nome === inputElem.value) {
                         inputElem.setCustomValidity('Il nome non può essere già presente');
+                        inputElem.title = 'Il nome non può essere già presente';
                         return false;
                     }
                 }
@@ -244,6 +246,7 @@
                 document.getElementById('gameArea').classList.add('hidden');
                 document.getElementById('dataInput').classList.remove('hidden');
                 this.refreshScoreTable();
+                this.checkInputValidity();
             }
         }
 
