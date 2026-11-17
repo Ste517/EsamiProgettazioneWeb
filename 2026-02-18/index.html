@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lettere che cadono</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            font-weight: bold;
+            font-size: larger;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background-color: blue;
+            color: white;
+            text-align: center;
+
+            padding: 10px;
+        }
+        form {
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+            
+            input, button {
+                border: 1px solid black;
+                padding: 10px;
+                font-size: large;
+                border-radius: 4px;
+            }
+
+            button:disabled {
+                border: 1px solid gray;
+            }
+        }
+        section {
+            border: 2px solid black;
+            margin: 10px;
+            padding: 10px;
+        }
+        canvas {
+            background-color: #FAFBD3;
+            border: 2px solid blue;
+            width: 60vw;
+            height: 40vw;
+        }
+        #gameSection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <header>Lettere che cadono</header>
+    <main>
+        <section id="inputSection">
+            <p>Inserisci 4 parole (3-6 lettere ciascuna, solo lettere, separate da spazi).</p>
+            <form><input type="text" name="parole" title="Inserisci 4 parole (3-6 lettere ciascuna, solo lettere, separate da spazi)" required><button type="submit" disabled>Inizia</button></form>
+            <p>Comandi: A sinistra, D destra</p>
+        </section>
+        <section id="gameSection" class="hidden">
+            <div></div>
+            <div><canvas></canvas></div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
