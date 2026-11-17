@@ -141,7 +141,10 @@
             
                 this.interval = setInterval(() => {
                     this.elapsedTime += GAME_CYCLE;
-                    if (this.elapsedTime >= GAME_LENGTH) this.terminateGame();
+                    if (this.elapsedTime >= GAME_LENGTH) {
+                        this.terminateGame();
+                        return;
+                    }
                     this.gameLoop();
                 }, GAME_CYCLE * 1000);
                 this.gameLoop();
@@ -150,7 +153,10 @@
             terminateGame() {
                 clearInterval(this.interval);
                 this.interval = null;
-                if (this.activeCell) this.activeCell.classList.remove('currentCell');
+                if (this.activeCell) {
+                    this.activeCell.classList.remove('currentCell');
+                    this.activeCell.removeEventListener('click', this.handleClick);
+                }
                 if (this.callbackOnFinish) this.callbackOnFinish();
             }
         
@@ -202,7 +208,7 @@
             }
         
             checkInputValidity() {
-                const regex = /[A-Z][a-zA-Z]{2,9}/;
+                const regex = /^[A-Z][a-zA-Z]{2,9}$/;
                 const inputElem = document.querySelector('input');
                 inputElem.title = 'Il nome deve avere una lunghezza tra 3 e 10 caratteri e deve iniziare per una lettera maiuscola';
                 if (regex.test(inputElem.value)) {
@@ -234,7 +240,9 @@
             refreshScoreTable() {
                 const tableBody = document.querySelector('#scoreSection table tbody');
                 tableBody.innerHTML = '';
-                this.partite.forEach((partita) => {
+                this.partite.sort((pA,pB) => {
+                    return pB.punteggio - pA.punteggio;
+                }).forEach((partita) => {
                     tableBody.appendChild(partita.asTableRow());
                 });
             }
@@ -246,7 +254,7 @@
                 document.getElementById('gameArea').classList.add('hidden');
                 document.getElementById('dataInput').classList.remove('hidden');
                 this.refreshScoreTable();
-                this.checkInputValidity();
+                document.getElementById('startGameButton').disabled = !this.checkInputValidity();
             }
         }
 
