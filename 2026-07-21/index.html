@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torneo di Ping Pong</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            font-size: large;
+            
+            background-color: #F4F4F4;
+        }
+        header {
+            width: 100%;
+            padding: 10px;
+            background-color: blue;
+            color: white;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        section {
+            background-color: white;
+            border: 2px solid black;
+            margin: 10px;
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+
+            h2 { 
+                align-self: flex-start; 
+            };
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            input {
+                padding: 10px;
+                font-family: sans-serif;
+                font-size: large;
+                border: 1px solid gray;
+                border-radius: 4px;
+            }
+            input:invalid {
+                border: 2px solid red;
+            }
+
+            button {
+                padding: 10px;
+                font-family: sans-serif;
+                font-size: large;
+                border: 1px solid black;
+                border-radius: 4px;
+            }
+            button:disabled {
+                color: gray;
+                border: 1px solid gray;
+            }
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto;
+            row-gap: 10px;
+            column-gap: 20px;
+        }
+        #errMsg {
+            color: red;
+        }
+        .flex-container {
+            display: flex;
+            align-items: center;
+            button {
+                padding: 10px;
+                font-size: large;
+                width: 200px;
+            }
+            button.playing {
+                background-color: #436FC1;
+                border: 1px solid #3A5D9E;
+                color: white;
+            }
+            button.won:disabled {
+                background-color: #6BAF4E;
+                border: 1px solid green;
+                color: white;
+            }
+            button:disabled {
+                background-color: #D9D9D9;
+                color: #5E5E5E;
+            }
+        }
+        .flex-container.row {
+            flex-direction: row;
+        }
+        .flex-container.col {
+            flex-direction: column;
+        }
+        .flex-container.small {
+            gap: 4px;
+        }
+        .flex-container.large {
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header><h2>TORNEO DI PING-PONG</h2></header>
+    <main>
+        <section>
+            <h2>Inserisci 8 partecipanti</h2>
+            <form>
+                <div class="grid">
+                    <label>Giocatore 1 <input type="text" name="g1" required></label>
+                    <label>Giocatore 2 <input type="text" name="g2" required></label>
+                    <label>Giocatore 3 <input type="text" name="g3" required></label>
+                    <label>Giocatore 4 <input type="text" name="g4" required></label>
+                    <label>Giocatore 5 <input type="text" name="g5" required></label>
+                    <label>Giocatore 6 <input type="text" name="g6" required></label>
+                    <label>Giocatore 7 <input type="text" name="g7" required></label>
+                    <label>Giocatore 8 <input type="text" name="g8" required></label>
+                </div>
+                <p id="errMsg"></p>
+                <button type="submit" disabled>Inizia torneo</button>
+            </form>
+        </section>
+        <section>
+            <div class="flex-container row large">
+                
+            </div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
