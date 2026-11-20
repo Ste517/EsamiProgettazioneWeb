@@ -47,13 +47,14 @@
         canvas {
             background-color: #FAFBD3;
             border: 2px solid blue;
-            width: 60vw;
-            height: 40vw;
         }
         #gameSection {
             display: flex;
             flex-direction: column;
             align-items: center;
+            div:nth-child(1) {
+                align-self: flex-start;
+            }
         }
         .hidden {
             display: none !important;
@@ -70,7 +71,7 @@
         </section>
         <section id="gameSection" class="hidden">
             <div></div>
-            <div><canvas></canvas></div>
+            <div><canvas width="800" height="500"></canvas></div>
         </section>
     </main>
     <script src="script.js"></script>
