@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,9 +10,10 @@
             margin: 0;
             font-family: sans-serif;
             font-size: large;
-            
+
             background-color: #F4F4F4;
         }
+
         header {
             width: 100%;
             padding: 10px;
@@ -20,12 +22,15 @@
             box-sizing: border-box;
             text-align: center;
         }
+
         main {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
         section {
+            width: 80vw;
             background-color: white;
             border: 2px solid black;
             margin: 10px;
@@ -34,15 +39,19 @@
             align-items: center;
             flex-direction: column;
 
-            h2 { 
-                align-self: flex-start; 
-            };
+            h2 {
+                align-self: flex-start;
+            }
+
+            ;
         }
+
         form {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
+
             input {
                 padding: 10px;
                 font-family: sans-serif;
@@ -50,6 +59,7 @@
                 border: 1px solid gray;
                 border-radius: 4px;
             }
+
             input:invalid {
                 border: 2px solid red;
             }
@@ -61,61 +71,108 @@
                 border: 1px solid black;
                 border-radius: 4px;
             }
+
             button:disabled {
                 color: gray;
                 border: 1px solid gray;
             }
         }
+
         .grid {
             display: grid;
             grid-template-columns: auto auto;
             row-gap: 10px;
             column-gap: 20px;
         }
+
         #errMsg {
             color: red;
         }
+
         .flex-container {
             display: flex;
-            align-items: center;
-            button {
-                padding: 10px;
-                font-size: large;
-                width: 200px;
+
+            h3 {
+                align-self: center;
             }
-            button.playing {
+
+            align-items: center;
+
+            button {
+                width: 100%;
+                padding: 10px;
+                border-radius: 4px;
+                font-size: large;
+                border: 1px solid gray;
+            }
+
+            button.ongoing {
                 background-color: #436FC1;
                 border: 1px solid #3A5D9E;
                 color: white;
             }
+
+            button.lost {
+                background-color: #D9D9D9;
+                border: 1px solid gray;
+                color: #545454;
+            }
+
             button.won:disabled {
                 background-color: #6BAF4E;
                 border: 1px solid green;
                 color: white;
             }
+
+            button.empty {
+                background-color: white !important;
+                padding: 20px;
+            }
+
             button:disabled {
                 background-color: #D9D9D9;
                 color: #5E5E5E;
             }
         }
+
         .flex-container.row {
-            flex-direction: row;
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: 1fr;
+            gap: 2rem;
+            width: fit-content;
+            margin: 0 auto;
         }
-        .flex-container.col {
+
+        .flex-container.column {
             flex-direction: column;
+            align-items: stretch;
         }
+
         .flex-container.small {
             gap: 4px;
         }
+
         .flex-container.large {
             gap: 10px;
         }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h3.finish {
+            color: green;
+        }
     </style>
 </head>
+
 <body>
-    <header><h2>TORNEO DI PING-PONG</h2></header>
+    <header>
+        <h2>TORNEO DI PING-PONG</h2>
+    </header>
     <main>
-        <section>
+        <section id="formSection">
             <h2>Inserisci 8 partecipanti</h2>
             <form>
                 <div class="grid">
@@ -132,12 +189,278 @@
                 <button type="submit" disabled>Inizia torneo</button>
             </form>
         </section>
-        <section>
-            <div class="flex-container row large">
-                
-            </div>
+        <section id="gameSection" class="flex-container column large hidden">
         </section>
     </main>
-    <script src="script.js"></script>
+    <script>
+        const TOURNAMENT_SECTIONS = ['Finale', 'Semifinali', 'Quarti di finale'];
+
+        class Tournament {
+            static #Game = class {
+                /** @type {(winnerName: string) => void} */
+                onwin = null;
+
+                constructor(player1 = null, player2 = null, player1Game = null, player2Game = null) {
+                    this.player1 = player1;
+                    this.player2 = player2;
+                    this.player1Game = player1Game;
+                    this.player2Game = player2Game;
+                    this.winner = null;
+                }
+
+                startGame() {
+                    if (this.winner || !this.player1 || !this.player2) return;
+                    const bottoni = this.displayElement.querySelectorAll('button');
+
+                    bottoni[0].textContent = this.player1;
+                    bottoni[1].textContent = this.player2;
+                    bottoni[0].classList.remove('empty');
+                    bottoni[1].classList.remove('empty');
+                    bottoni[0].classList.add('ongoing');
+                    bottoni[1].classList.add('ongoing');
+                    bottoni[0].disabled = false;
+                    bottoni[1].disabled = false;
+
+                    const handleWin = (winnerIndex) => {
+                        const loserIndex = winnerIndex === 0 ? 1 : 0;
+                        this.winner = winnerIndex === 0 ? this.player1 : this.player2;
+
+                        bottoni[0].onclick = null;
+                        bottoni[1].onclick = null;
+                        bottoni[0].disabled = true;
+                        bottoni[1].disabled = true;
+                        bottoni[0].classList.remove('ongoing');
+                        bottoni[1].classList.remove('ongoing');
+                        bottoni[winnerIndex].classList.add('won');
+                        bottoni[loserIndex].classList.add('lost');
+
+                        if (this.onwin) {
+                            this.onwin(this.winner);
+                        }
+                    };
+
+                    bottoni[0].onclick = () => handleWin(0);
+                    bottoni[1].onclick = () => handleWin(1);
+                }
+
+                hasFinished() {
+                    return this.winner !== null;
+                }
+
+                generateDisplayElement() {
+                    const container = document.createElement('div');
+                    container.classList.add('flex-container', 'column', 'small');
+
+                    const p1btn = document.createElement('button');
+                    const p2btn = document.createElement('button');
+
+                    p1btn.textContent = this.player1;
+                    p2btn.textContent = this.player2;
+
+                    if (!this.player1) {
+                        p1btn.classList.add('empty');
+                    }
+                    if (!this.player2) {
+                        p2btn.classList.add('empty');
+                    }
+
+                    p1btn.disabled = true;
+                    p2btn.disabled = true;
+
+                    container.append(p1btn, p2btn);
+                    this.displayElement = container;
+                    return container;
+                }
+            };
+
+            #games = null;
+
+            #buildTree(level = 0) {
+                if (level < 0 || level >= this.treeSize) return null;
+
+                if (level === this.treeSize - 1) {
+                    return new Tournament.#Game(
+                        this.players[this.currentPlayer++],
+                        this.players[this.currentPlayer++]
+                    );
+                }
+
+                const game = new Tournament.#Game();
+                if (level === 0) game.onwin = (winner) => {
+                    const finishTitle = document.createElement('h3');
+                    finishTitle.innerText = 'Vincitore: ' + winner;
+                    finishTitle.classList.add('finish');
+                    document.getElementById('gameSection').insertBefore(finishTitle, this.finishButton);
+                    this.finishButton.disabled = false;
+                };
+                game.player1Game = this.#buildTree(level + 1);
+                game.player1Game.onwin = (winner) => {
+                    const button = game.displayElement.querySelectorAll('button')[0];
+                    game.player1 = winner;
+                    button.innerText = winner;
+                    button.classList.remove('empty');
+                    this.#checkPlayableLevel(this.#games);
+                };
+                game.player2Game = this.#buildTree(level + 1);
+                game.player2Game.onwin = (winner) => {
+                    const button = game.displayElement.querySelectorAll('button')[1];
+                    game.player2 = winner;
+                    button.innerText = winner;
+                    button.classList.remove('empty');
+                    this.#checkPlayableLevel(this.#games);
+                };
+                return game;
+            }
+
+            #buildTreeVisualElement(rootElement, game, level = 0) {
+                if (level < 0 || level >= this.treeSize || game === null) return;
+                this.#buildTreeVisualElement(rootElement, game.player1Game, level + 1);
+                rootElement.childNodes[this.treeSize - 1 - level].appendChild(game.generateDisplayElement());
+                this.#buildTreeVisualElement(rootElement, game.player2Game, level + 1);
+            }
+
+            #checkPlayableLevel(tree) {
+                if (tree === null) return;
+
+                const levels = [];
+                let currentLevel = [tree];
+
+                while (currentLevel.length > 0) {
+                    levels.push(currentLevel);
+                    const nextLevel = [];
+
+                    for (const game of currentLevel) {
+                        if (game.player1Game) nextLevel.push(game.player1Game);
+                        if (game.player2Game) nextLevel.push(game.player2Game);
+                    }
+
+                    currentLevel = nextLevel;
+                }
+
+                for (let i = levels.length - 1; i >= 0; i--) {
+                    const roundGames = levels[i];
+                    const allFinished = roundGames.every(game => game.hasFinished());
+
+                    if (!allFinished) {
+                        for (const game of roundGames) {
+                            if (!game.hasFinished()) {
+                                game.startGame();
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
+
+
+            /** @param {string[]} players */
+            constructor(players) {
+                if (!Array.isArray(players) || players.length < 2) {
+                    throw new Error('Players must be an array with at least 2 players');
+                }
+
+                const treeSize = Math.log2(players.length);
+                if (!Number.isInteger(treeSize)) {
+                    throw new Error('Number of players must be a power of two');
+                }
+
+                this.treeSize = treeSize;
+                this.players = [...players].sort(() => Math.random() - 0.5);
+                this.currentPlayer = 0;
+                this.#games = this.#buildTree(0);
+
+                this.visualRoot = document.createElement('div');
+                this.visualRoot.classList.add('flex-container', 'row', 'large');
+                for (let i = 0; i < this.treeSize; i++) {
+                    const column = document.createElement('div');
+                    column.classList.add('flex-container', 'column', 'large');
+                    this.visualRoot.appendChild(column);
+                    const coltitle = document.createElement('h3');
+                    coltitle.innerText = TOURNAMENT_SECTIONS[this.treeSize - i - 1];
+                    column.appendChild(coltitle);
+                }
+
+                this.#buildTreeVisualElement(this.visualRoot, this.#games, 0);
+                const gameSection = document.getElementById('gameSection');
+                gameSection.appendChild(this.visualRoot);
+                this.finishButton = document.createElement('button');
+                this.finishButton.disabled = true;
+                this.finishButton.innerText = 'Nuovo torneo';
+                this.finishButton.onclick = () => {
+                    gameSection.classList.add('hidden');
+                    document.getElementById('formSection').classList.remove('hidden');
+                    this.deleteTournament();
+                }
+                gameSection.appendChild(this.finishButton);
+
+                this.#checkPlayableLevel(this.#games);
+            }
+
+            deleteTournament() {
+                document.getElementById('gameSection').innerHTML = '';
+            }
+        }
+
+        class FormHandler {
+            constructor() {
+                /** @type {HTMLFormElement} */
+                this.form = document.querySelector('form');
+                /** @type {HTMLInputElement[]} */
+                this.formInputs = [];
+                for (let i = 1; i < 9; i++) {
+                    this.formInputs.push(this.form['g' + i]);
+                }
+
+                this.form.oninput = () => {
+                    const isValid = this.validateAllInputs();
+                    this.form.querySelector('button').disabled = !isValid;
+                };
+
+                this.form.onsubmit = (event) => {
+                    event.preventDefault();
+                    const giocatori = this.formInputs.map((input) => input.value);
+                    if (this.tournament) this.tournament.deleteTournament();
+                    this.tournament = new Tournament(giocatori);
+                    document.getElementById('formSection').classList.add('hidden');
+                    document.getElementById('gameSection').classList.remove('hidden');
+                };
+            }
+
+            validateAllInputs() {
+                const regex = /^[A-Z][a-z]{2,9}$/;
+                const errMsg = document.getElementById('errMsg');
+                let allFormatValid = true;
+                let hasDuplicates = false;
+
+                for (const input of this.formInputs) {
+                    if (!regex.test(input.value)) {
+                        input.setCustomValidity('Il nome deve avere tra 3 e 10 lettere, con la prima lettera maiuscola');
+                        allFormatValid = false;
+                    } else {
+                        input.setCustomValidity('');
+                    }
+                }
+
+                for (let i = 0; i < this.formInputs.length; i++) {
+                    for (let j = i + 1; j < this.formInputs.length; j++) {
+                        if (
+                            this.formInputs[i].value !== '' &&
+                            this.formInputs[i].value === this.formInputs[j].value
+                        ) {
+                            this.formInputs[i].setCustomValidity('I nomi dei partecipanti devono essere diversi');
+                            this.formInputs[j].setCustomValidity('I nomi dei partecipanti devono essere diversi');
+                            hasDuplicates = true;
+                        }
+                    }
+                }
+
+                errMsg.innerText = hasDuplicates ? 'I nomi dei partecipanti devono essere diversi' : '';
+                return allFormatValid && !hasDuplicates;
+            }
+        }
+
+        const handler = new FormHandler();
+    </script>
 </body>
+
 </html>
