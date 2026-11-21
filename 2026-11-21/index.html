@@ -113,9 +113,9 @@
             <form>
                 <label>Nome <input type="text" name="name" required></label>
                 <label>Difficoltà <select name="difficulty">
-                    <option value="">Facile</option>
-                    <option value="">Normale</option>
-                    <option value="">Difficile</option>
+                    <option>Facile</option>
+                    <option>Normale</option>
+                    <option>Difficile</option>
                 </select></label>
                 <label id="errMsg" class="hidden"></label>
                 <button type="submit" disabled>Inizia gioco</button>
@@ -265,12 +265,13 @@
                 window.addEventListener('keyup',this.spaceship.handleKeyUp);
                 
                 this.timestamp = undefined;
+                this.terminated = false;
 
                 requestAnimationFrame((timestamp) => {this.animate(timestamp);});
             }
 
             animate(timestamp) {
-                if (this.timestamp === undefined) this.timestamp = 0;
+                if (this.timestamp === undefined) this.timestamp = timestamp;
                 const ctx = this.canvas.getContext('2d');
                 const timedelta = timestamp - this.timestamp;
                 ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
@@ -283,6 +284,9 @@
                 this.spaceship.simulate(timedelta);
 
                 if (this.asteroids.some((asteroid) => asteroid.checkSpaceshipHit(this.spaceship))) this.terminate();
+                
+                if (this.terminated) return;
+
                 this.asteroids.forEach((asteroid) => {
                     asteroid.draw(ctx);
                 });
@@ -298,8 +302,11 @@
             }
 
             terminate() {
+                window.removeEventListener('keydown', this.spaceship.handleKeyDown);
+                window.removeEventListener('keyup', this.spaceship.handleKeyUp);
                 clearInterval(this.interval);
                 clearInterval(this.spawnInterval);
+                this.terminated = true;
                 if (this.onfinish) this.onfinish();
             }
         }
@@ -315,7 +322,7 @@
                 const col1 = document.createElement('td');
                 col1.innerText = this.playerName;
                 const col2 = document.createElement('td');
-                col2.innerText = this.score;
+                col2.innerText = this.score + ' s';
 
                 tableRow.append(col1,col2);
                 return tableRow;
@@ -332,7 +339,7 @@
                     if (!this.checkValidity()) return;
                     if (this.game === null) {
                         let difficulty;
-                        switch (this.form['difficulty']) {
+                        switch (this.form['difficulty'].value) {
                             case 'Facile': {
                                 difficulty = 0.5;
                                 break;
