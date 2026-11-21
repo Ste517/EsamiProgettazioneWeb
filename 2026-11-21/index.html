@@ -153,20 +153,20 @@
                 };
                 
                 this.handleKeyDown = (ev) => {
-                    if (ev.key == 'a') {
+                    if (ev.key.toLowerCase() == 'a') {
                         this.keys.left = true;
                     }
-                    if (ev.key == 'd') {
+                    if (ev.key.toLowerCase() == 'd') {
                         this.keys.right = true;
                     }
                     this.updateVelocity();
                 };
 
                 this.handleKeyUp = (ev) => {
-                    if (ev.key == 'a') {
+                    if (ev.key.toLowerCase() == 'a') {
                         this.keys.left = false;
                     }
-                    if (ev.key == 'd') {
+                    if (ev.key.toLowerCase() == 'd') {
                         this.keys.right = false;
                     }
                     this.updateVelocity();
