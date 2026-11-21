@@ -232,9 +232,32 @@
             }
 
             checkSpaceshipHit(spaceship) {
-                if ((this.y >= spaceship.y - (spaceship.height/2)) && (this.y <= spaceship.y + (spaceship.height/2)) &&
-                    (this.x >= spaceship.x - (spaceship.width/2)) && (this.x <= spaceship.x + (spaceship.width/2))) return true;
-                return false;
+                let asteroidLimits = {
+                    top: this.y - (this.size/2),
+                    right: this.x + (this.size/2),
+                    bottom: this.y + (this.size/2),
+                    left: this.x - (this.size/2)
+                };
+                let spaceshipLimits = {
+                    top: spaceship.y - (spaceship.height/2),
+                    right: spaceship.x + (spaceship.width/2),
+                    bottom: spaceship.y + (spaceship.height/2),
+                    left: spaceship.x - (spaceship.width/2)
+                };
+                let vertices = [
+                    [asteroidLimits.right,asteroidLimits.top],
+                    [asteroidLimits.right,asteroidLimits.bottom],
+                    [asteroidLimits.left,asteroidLimits.bottom],
+                    [asteroidLimits.left,asteroidLimits.top]
+                ];
+                return vertices.some((vertex) => {
+                    return (
+                        (vertex[0] <= spaceshipLimits.right) &&
+                        (vertex[0] >= spaceshipLimits.left) &&
+                        (vertex[1] <= spaceshipLimits.bottom) &&
+                        (vertex[1] >= spaceshipLimits.top)
+                    );
+                });
             }
         }
 
