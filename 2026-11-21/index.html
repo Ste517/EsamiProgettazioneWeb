@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+        }
+        h1 {
+            padding: 10px;
+            background-color: lightblue;
+        }
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        main {
+            display: flex;
+            flex-direction: row;
+        }
+        section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #gameSection {
+            background-color: lightyellow;
+        }
+        #scoreboardSection {
+            background-color: lightsalmon;
+        }
+        canvas {
+            background-color: white;
+            border: 1px solid black;
+            margin: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            min-width: 200px;
+            width: 80%;
+            margin: 0 20px 20px 20px;
+            td,th {
+                text-align: center;
+                padding: 5px;
+                border: 1px solid black;
+            }
+
+            td {
+                background-color: white;
+                width: 50%;
+            }
+            th {
+                background-color: lightcyan;
+            }
+        }
+        .hidden {
+            display: none !important;
+        }
+        form {
+            margin: 20px;
+            padding: 10px;
+            background-color: white;
+
+            min-width: 200px;
+            width: 50%;
+
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            label {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                font-weight: bold;
+            }
+
+            input,select,button {
+                padding: 5px;
+                border-radius: 5px;
+            }
+            
+            input,select {
+                font-weight: bold;
+                border: 1px solid gray;
+            }
+
+            button {
+                border: 0;
+                background-color: #335ac7;
+                color: white;
+            }
+            button:disabled {
+                background-color: rgb(140, 164, 229);
+            }
+            #errMsg {
+                color: red;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Astronave e meteoriti</h1>
+    </header>
+    <main>
+        <section id="gameSection">
+            <form>
+                <label>Nome <input type="text" name="name" required></label>
+                <label>Difficoltà <select name="difficulty">
+                    <option value="">Facile</option>
+                    <option value="">Normale</option>
+                    <option value="">Difficile</option>
+                </select></label>
+                <label id="errMsg" class="hidden"></label>
+                <button type="submit" disabled>Inizia gioco</button>
+            </form>
+            <canvas class="hidden" width="400" height="400">
+
+            </canvas>
+        </section>
+        <section id="scoreboardSection">
+            <h2>Classifica</h2>
+            <table>
+                <thead><tr><th>Nome</th><th>Punteggio</th></tr></thead>
+                <tbody>
+                    <tr><td>Prova</td><td>Ciao</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <script>
+        class Spaceship {
+            constructor(canvasWidth, canvasHeight) {
+                this.x = canvasWidth / 2;
+                this.y = canvasHeight - 60;
+
+                this.width = 40;
+                this.height = 60;
+
+                this.speed = 200;
+                
+                this.vx = 0;
+                
+                this.keys = {
+                    left: false,
+                    right: false
+                };
+                
+                this.handleKeyDown = (ev) => {
+                    if (ev.key == 'a') {
+                        this.keys.left = true;
+                    }
+                    if (ev.key == 'd') {
+                        this.keys.right = true;
+                    }
+                    this.updateVelocity();
+                };
+
+                this.handleKeyUp = (ev) => {
+                    if (ev.key == 'a') {
+                        this.keys.left = false;
+                    }
+                    if (ev.key == 'd') {
+                        this.keys.right = false;
+                    }
+                    this.updateVelocity();
+                };
+                
+                this.canvasWidth = canvasWidth;
+            }
+
+            updateVelocity() {
+                if (this.keys.left && !this.keys.right) {
+                    this.vx = -this.speed;
+                    return;
+                }
+                if (this.keys.right && !this.keys.left) {
+                    this.vx = this.speed;
+                    return;
+                }
+                this.vx = 0;
+            }
+            
+            simulate(timeDelta) {
+                const dtSecs = timeDelta / 1000;
+                this.x += this.vx * dtSecs;
+                if (this.x < (this.width / 2) + 10) this.x = (this.width / 2) + 10;
+                if (this.x > this.canvasWidth - 10 - (this.width / 2)) this.x = this.canvasWidth - 10 - (this.width / 2);
+            }
+
+            /** @param {CanvasRenderingContext2D} ctx */
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x,this.y);
+                ctx.fillStyle = '#335ac7';
+                ctx.fillRect(-(this.width/2),-(this.height/2),this.width,this.height);
+                ctx.restore();
+            }
+        }
+
+        class Asteroid {
+            constructor(canvasWidth, canvasHeight) {
+                this.x = canvasWidth * 0.05 + (Math.random() * canvasWidth * 0.9); 
+                this.y = 0;
+
+                this.size = 20;
+
+                this.vy = 150;
+
+                this.canvasWidth = canvasWidth;
+                this.canvasHeight = canvasHeight;
+            }
+
+            simulate(timeDelta) {
+                const dtSecs = timeDelta / 1000;
+                this.y += this.vy * dtSecs;
+            }
+
+            /** @param {CanvasRenderingContext2D} ctx */
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.fillStyle = '#ff0000';
+                ctx.fillRect(-(this.size/2),-(this.size/2),this.size,this.size);
+                ctx.restore();
+            }
+
+            checkSpaceshipHit(spaceship) {
+                if ((this.y >= spaceship.y - (spaceship.height/2)) && (this.y <= spaceship.y + (spaceship.height/2)) &&
+                    (this.x >= spaceship.x - (spaceship.width/2)) && (this.x <= spaceship.x + (spaceship.width/2))) return true;
+                return false;
+            }
+        }
+
+        class Game {
+            onfinish = null;
+
+            constructor(playerName, difficulty) {
+                this.playerName = playerName;
+                this.score = 0;
+
+                this.spawnPeriod = 2 / difficulty;
+
+                this.spawnInterval = setInterval(() => {
+                    this.asteroids.push(new Asteroid(this.canvas.width, this.canvas.height));
+                },this.spawnPeriod*1000);
+
+                this.interval = setInterval(() => {
+                    this.score++;
+                },1000);
+
+                this.canvas = document.querySelector('canvas');
+
+                /** @type {Asteroid[]} */
+                this.asteroids = [];
+                this.spaceship = new Spaceship(this.canvas.width, this.canvas.height);
+
+                window.addEventListener('keydown',this.spaceship.handleKeyDown);
+                window.addEventListener('keyup',this.spaceship.handleKeyUp);
+                
+                this.timestamp = undefined;
+
+                requestAnimationFrame((timestamp) => {this.animate(timestamp);});
+            }
+
+            animate(timestamp) {
+                if (this.timestamp === undefined) this.timestamp = 0;
+                const ctx = this.canvas.getContext('2d');
+                const timedelta = timestamp - this.timestamp;
+                ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                ctx.font = '20px sans-serif';
+                ctx.fillText('Punteggio: '+this.score, 10, 20);
+
+                this.asteroids.forEach((asteroid) => {
+                    asteroid.simulate(timedelta);
+                });
+                this.spaceship.simulate(timedelta);
+
+                if (this.asteroids.some((asteroid) => asteroid.checkSpaceshipHit(this.spaceship))) this.terminate();
+                this.asteroids.forEach((asteroid) => {
+                    asteroid.draw(ctx);
+                });
+                this.spaceship.draw(ctx);
+
+                
+                this.asteroids = this.asteroids.filter((asteroid) => {
+                    return (asteroid.y <= this.canvas.height && asteroid.y >= 0);
+                });
+                
+                this.timestamp = timestamp;
+                requestAnimationFrame((timestamp) => {this.animate(timestamp);});
+            }
+
+            terminate() {
+                clearInterval(this.interval);
+                clearInterval(this.spawnInterval);
+                if (this.onfinish) this.onfinish();
+            }
+        }
+
+        class Partita {
+            constructor(playerName, score) {
+                this.playerName = playerName;
+                this.score = score;
+            }
+
+            asTableRow() {
+                const tableRow = document.createElement('tr');
+                const col1 = document.createElement('td');
+                col1.innerText = this.playerName;
+                const col2 = document.createElement('td');
+                col2.innerText = this.score;
+
+                tableRow.append(col1,col2);
+                return tableRow;
+            }
+        }
+
+        class FormHandler {
+            constructor() {
+                this.form = document.querySelector('form');
+                this.canvas = document.querySelector('canvas');
+                this.game = null;
+                this.form.onsubmit = (ev) => {
+                    ev.preventDefault();
+                    if (!this.checkValidity()) return;
+                    if (this.game === null) {
+                        let difficulty;
+                        switch (this.form['difficulty']) {
+                            case 'Facile': {
+                                difficulty = 0.5;
+                                break;
+                            }
+                            case 'Difficile': {
+                                difficulty = 2.0;
+                                break;
+                            }
+                            default: difficulty = 1.0;
+                        }
+                        this.game = new Game(this.form['name'].value,difficulty);
+                        this.game.onfinish = () => {
+                            let playerName = this.game.playerName;
+                            let score = this.game.score;
+                            this.partite.push(new Partita(playerName, score));
+                            this.canvas.classList.add('hidden');
+                            this.form.classList.remove('hidden');
+                            this.game = null;
+                            this.refreshScoreboard();
+                            this.checkValidity();
+                        }
+                    }
+                    this.form.classList.add('hidden');
+                    this.canvas.classList.remove('hidden');
+                    this.form.reset();
+                }
+
+                this.form.oninput = () => {
+                    this.checkValidity();
+                }
+
+                /** @type {Partita[]} */
+                this.partite = [];
+                this.refreshScoreboard();
+            }
+
+            checkValidity() {
+                const input = this.form.elements['name'];
+                const submitButton = this.form.querySelector('button');
+                const errMsgLabel = document.getElementById('errMsg');
+                const regex = /^(?=.*[a-z])(?=.*[0-9])[A-Z][A-Za-z0-9]{5,11}()$/;
+                errMsgLabel.classList.add('hidden');
+                if (regex.test(input.value)) {
+                    submitButton.disabled = false;
+                } else {
+                    submitButton.disabled = true;
+                    return false;
+                }
+
+                if (this.partite.every((partita) => partita.playerName !== input.value)) {
+                    return true;
+                } else {
+                    submitButton.disabled = true;
+                    errMsgLabel.classList.remove('hidden');
+                    errMsgLabel.innerText = 'Nome già presente in classifica';
+                    return false;
+                }
+            }
+
+            refreshScoreboard() {
+                const scoreboard = document.querySelector('#scoreboardSection table tbody');
+                scoreboard.innerHTML = '';
+                const sortedScoreboard = this.partite.sort((a,b) => b.score - a.score);
+                for (let i = 0; i < 10 && i < sortedScoreboard.length; i++) {
+                    scoreboard.appendChild(sortedScoreboard[i].asTableRow());
+                }
+            }
+        }
+
+        const handler = new FormHandler();
+    </script>
+</body>
+</html>
